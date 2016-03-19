@@ -1,10 +1,14 @@
 from PIL import Image, ImageGrab, ImageDraw
 from numpy import array
-from scipy.cluster.vq import vq, kmeans, whiten
+from scipy.cluster.vq import  kmeans #, whiten, vq
+import time
+import serial
+import serial.tools.list_ports
 import timeit
 
 
-k = 7
+
+
 
 
 def image_open():
@@ -51,21 +55,36 @@ def draw_on_image():
     return
 
 
-#while True:
-start = timeit.default_timer()
-img = image_open()
-img.thumbnail((100,100))
+if __name__ == '__main__':
+    k = 5
+    #ports = list(serial.tools.list_ports.comports())
+    #print (ports[1])
+    try: #Attempts to connect to arduino serial usb port
+      ser = serial.Serial('COM8', 9600, timeout=0)
+    except:
+      ser = serial.Serial('COM3', 9600, timeout=0)   
+    time.sleep(2) #gives time to connect
+    
+    while True:
+        start = timeit.default_timer()
+        img = image_open()
+        img.thumbnail((100,100))
+        
+        rgb_array = []    
+        
+        rgb_array = rgb_pixel_array()
+        vector, distortion = kmeans(array(rgb_array),k)
+        sorted_colors = check_colors(vector)
+        
+        rgb_tuples = [tuple(l) for l in vector.astype(int)]
+        
+        red,green,blue = rgb_tuples[sorted_colors[1]]
+        stop = timeit.default_timer()
+        blue = (blue + 2 // 2) // 2
+        print(red,green,blue)
+        rgb_led = "0{}r,0{}g,0{}b,".format(red,green,blue).encode()
+        #print(rgb_led)
+        ser.write(rgb_led)
+        print(stop-start)
 
-rgb_array = []    
-
-rgb_array = rgb_pixel_array()
-vector, distortion = kmeans(array(rgb_array),k)
-sorted_colors = check_colors(vector)
-
-rgb_tuples = [tuple(l) for l in vector.astype(int)]
-
-stop = timeit.default_timer()
-print(rgb_tuples[sorted_colors[1]])
-print(stop-start)
-
-draw_on_image()
+    #draw_on_image()
