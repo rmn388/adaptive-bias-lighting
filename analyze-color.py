@@ -24,6 +24,8 @@ def rgb_pixel_array():
     return rgb_array
 
 def check_colors(color_array):
+    brightest = 0
+    most_saturated = 0
     brightest_value = 0
     darkest_value = 768
     most_saturated_value = 0
@@ -56,13 +58,13 @@ def draw_on_image():
 
 
 if __name__ == '__main__':
-    k = 5
+    k = 4
     #ports = list(serial.tools.list_ports.comports())
     #print (ports[1])
     try: #Attempts to connect to arduino serial usb port
-      ser = serial.Serial('COM8', 9600, timeout=0)
+      ser = serial.Serial('COM6', 9600, timeout=0)
     except:
-      ser = serial.Serial('COM3', 9600, timeout=0)   
+      ser = serial.Serial('COM6', 9600, timeout=0)   
     time.sleep(2) #gives time to connect
     
     while True:
@@ -80,7 +82,9 @@ if __name__ == '__main__':
         
         red,green,blue = rgb_tuples[sorted_colors[1]]
         stop = timeit.default_timer()
-        blue = (blue + 2 // 2) // 2
+        print(red,green,blue)
+        green = (green + 2 // 2) // 2
+        blue = (blue + 2 // 3) // 3
         print(red,green,blue)
         rgb_led = "0{}r,0{}g,0{}b,".format(red,green,blue).encode()
         #print(rgb_led)
